@@ -2,27 +2,36 @@ local lz = require("lovezero")
 
 local game = {}
 
-local box_x = 100
-local box_y = 100
+-- Create our actor using the character asset
+local character = lz.Actor:new({
+    x = 50,
+    y = 100,
+    image = "examples/assets/alien.png"
+})
+
 local direction = 1
 
 function game.update(dt)
-    -- Move the box back and forth
-    box_x = box_x + (150 * dt * direction)
-    if box_x > 600 or box_x < 100 then
+    -- Move the character back and forth
+    character.x = character.x + (150 * dt * direction)
+    if character.x > 200 or character.x < 50 then
         direction = direction * -1
     end
+
+    -- Manually update the actor state
+    character:update(dt)
 end
 
 function game.draw()
     -- Fill the screen with a dark blue color (R, G, B)
     lz.screen.fill({0.1, 0.1, 0.2})
     
-    -- Draw text at x=50, y=50
-    lz.screen.draw.text("Welcome to LoveZero!", {50, 50})
+    -- Draw background text first
+    lz.screen.draw.text("Welcome to LoveZero!", {30, 30})
+    lz.screen.draw.text("The Actor is updated and drawn.", {30, 50})
     
-    -- Draw an orange rectangle
-    lz.screen.draw.rect({box_x, box_y, 100, 100}, {1, 0.5, 0})
+    -- Manually draw the character actor to guarantee it renders on top of the text
+    character:draw()
 end
 
 return game

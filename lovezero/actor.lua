@@ -26,12 +26,40 @@ function Actor:new(params)
         local g = get_graphics()
         if g and g.newImage then
             if not image_cache[obj.image_path] then
-                -- Note: error handling is omitted for brevity, assuming path is correct
-                local success, img = pcall(g.newImage, obj.image_path)
-                if success and img then
-                    image_cache[obj.image_path] = img
+                local loaded_img = nil
+
+                -- 1. Try to load the image out-of-sandbox using standard io.open (useful for subdirectories/examples)
+                local file = io.open(obj.image_path, "rb")
+                if file then
+                    local contents = file:read("*a")
+                    file:close()
+                    if type(love) == "table" and love.filesystem and love.image then
+                        local ok1, fileData = pcall(love.filesystem.newFileData, contents, obj.image_path)
+                        if ok1 and fileData then
+                            local ok2, imageData = pcall(love.image.newImageData, fileData)
+                            if ok2 and imageData then
+                                local ok3, img = pcall(g.newImage, imageData)
+                                if ok3 and img then
+                                    loaded_img = img
+                                end
+                            end
+                        end
+                    end
+                end
+
+                -- 2. Fall back to standard newImage (for in-sandbox / non-Love2D engines)
+                if not loaded_img then
+                    local success, img = pcall(g.newImage, obj.image_path)
+                    if success and img then
+                        loaded_img = img
+                    end
+                end
+
+                if loaded_img then
+                    image_cache[obj.image_path] = loaded_img
                 end
             end
+
             obj.image = image_cache[obj.image_path]
             if obj.image then
                 if type(obj.image.getWidth) == "function" then
