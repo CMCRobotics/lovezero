@@ -1,5 +1,4 @@
 local Actor = {}
-Actor.__index = Actor
 
 local function get_graphics()
     if type(lutro) == "table" and type(lutro.graphics) == "table" then
@@ -12,66 +11,106 @@ end
 
 local image_cache = {}
 
+local function load_image(image_path)
+    if not image_path then return nil end
+    local g = get_graphics()
+    if not (g and g.newImage) then return nil end
+
+    if not image_cache[image_path] then
+        local loaded_img = nil
+
+        -- 1. Try to load the image out-of-sandbox using standard io.open (useful for subdirectories/examples)
+        local file = io.open(image_path, "rb")
+        if file then
+            local contents = file:read("*a")
+            file:close()
+            if type(love) == "table" and love.filesystem and love.image then
+                local ok1, fileData = pcall(love.filesystem.newFileData, contents, image_path)
+                if ok1 and fileData then
+                    local ok2, imageData = pcall(love.image.newImageData, fileData)
+                    if ok2 and imageData then
+                        local ok3, img = pcall(g.newImage, imageData)
+                        if ok3 and img then
+                            loaded_img = img
+                        end
+                    end
+                end
+            end
+        end
+
+        -- 2. Fall back to standard newImage (for in-sandbox / non-Love2D engines)
+        if not loaded_img then
+            local success, img = pcall(g.newImage, image_path)
+            if success and img then
+                loaded_img = img
+            end
+        end
+
+        if loaded_img then
+            image_cache[image_path] = loaded_img
+        end
+    end
+
+    return image_cache[image_path]
+end
+
 function Actor:new(params)
-    local obj = {
+    local properties = {
         x = params.x or 0,
         y = params.y or 0,
         width = params.width or 0,
         height = params.height or 0,
-        image_path = params.image,
+        image_path = nil,
         image = nil
     }
 
-    if obj.image_path then
-        local g = get_graphics()
-        if g and g.newImage then
-            if not image_cache[obj.image_path] then
-                local loaded_img = nil
+    local obj = {
+        _props = properties
+    }
 
-                -- 1. Try to load the image out-of-sandbox using standard io.open (useful for subdirectories/examples)
-                local file = io.open(obj.image_path, "rb")
-                if file then
-                    local contents = file:read("*a")
-                    file:close()
-                    if type(love) == "table" and love.filesystem and love.image then
-                        local ok1, fileData = pcall(love.filesystem.newFileData, contents, obj.image_path)
-                        if ok1 and fileData then
-                            local ok2, imageData = pcall(love.image.newImageData, fileData)
-                            if ok2 and imageData then
-                                local ok3, img = pcall(g.newImage, imageData)
-                                if ok3 and img then
-                                    loaded_img = img
-                                end
-                            end
-                        end
-                    end
-                end
+    setmetatable(obj, Actor)
 
-                -- 2. Fall back to standard newImage (for in-sandbox / non-Love2D engines)
-                if not loaded_img then
-                    local success, img = pcall(g.newImage, obj.image_path)
-                    if success and img then
-                        loaded_img = img
-                    end
-                end
+    if params.image then
+        obj.image = params.image -- Triggers __newindex to load the image
+    end
 
-                if loaded_img then
-                    image_cache[obj.image_path] = loaded_img
-                end
-            end
+    return obj
+end
 
-            obj.image = image_cache[obj.image_path]
-            if obj.image then
-                if type(obj.image.getWidth) == "function" then
-                    obj.width = obj.image:getWidth()
-                    obj.height = obj.image:getHeight()
+function Actor:__index(key)
+    -- First check if it's a method in the Actor class
+    local class_val = Actor[key]
+    if class_val ~= nil then
+        return class_val
+    end
+    -- Otherwise read from properties
+    if self._props then
+        return self._props[key]
+    end
+    return nil
+end
+
+function Actor:__newindex(key, value)
+    if key == "image" or key == "image_path" then
+        if type(value) == "string" then
+            self._props.image_path = value
+            local img = load_image(value)
+            self._props.image = img
+            if img then
+                if type(img.getWidth) == "function" then
+                    self._props.width = img:getWidth()
+                    self._props.height = img:getHeight()
                 end
             end
+            return
         end
     end
 
-    setmetatable(obj, Actor)
-    return obj
+    if self._props and self._props[key] ~= nil then
+        self._props[key] = value
+    else
+        rawset(self, key, value)
+    end
 end
 
 function Actor:update(dt)
