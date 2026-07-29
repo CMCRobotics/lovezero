@@ -38,3 +38,6 @@ LoveZero includes a headless pure-Lua test suite to validate internal logic with
 chmod +x test.sh
 ./test.sh
 ```
+
+## Credits
+- Character assets provided by the amazing [Kenney Assets](https://kenney.nl/) from the [New Platformer Pack](https://kenney.nl/assets/new-platformer-pack).
