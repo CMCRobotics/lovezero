@@ -2,11 +2,18 @@ local lz = require("lovezero")
 
 local game = {}
 
--- Create our actor using the character asset
+-- Create our moving actor using the character asset
 local character = lz.Actor:new({
-    x = 50,
-    y = 100,
-    image = "examples/assets/alien.png"
+    x = 100,
+    y = 150,
+    image = "examples/assets/character_green_walk_a.png"
+})
+
+-- Create a second stationary actor to collide with
+local stationary_block = lz.Actor:new({
+    x = 300,
+    y = 150,
+    image = "examples/assets/character_green_idle.png"
 })
 
 local direction = 1
@@ -14,23 +21,36 @@ local direction = 1
 function game.update(dt)
     -- Move the character back and forth
     character.x = character.x + (150 * dt * direction)
-    if character.x > 200 or character.x < 50 then
+    if character.x > 500 or character.x < 100 then
         direction = direction * -1
     end
 
-    -- Manually update the actor state
+    -- Manually update actor states
     character:update(dt)
+    stationary_block:update(dt)
 end
 
 function game.draw()
-    -- Fill the screen with a dark blue color (R, G, B)
-    lz.screen.fill({0.1, 0.1, 0.2})
+    -- Check for collision between character and block using LoveZero's AABB colliderect API
+    local is_colliding = character:colliderect(stationary_block)
+
+    -- Set background color based on collision state:
+    -- Dark Red if colliding, Dark Blue otherwise
+    local bg_color = is_colliding and {0.4, 0.1, 0.1} or {0.1, 0.1, 0.2}
+    lz.screen.fill(bg_color)
     
-    -- Draw background text first
-    lz.screen.draw.text("Welcome to LoveZero!", {30, 30})
-    lz.screen.draw.text("The Actor is updated and drawn.", {30, 50})
+    -- Draw background text
+    lz.screen.draw.text("Welcome to LoveZero!", {50, 50})
+    lz.screen.draw.text("The Actors are updated and drawn manually to control display ordering.", {50, 80})
     
-    -- Manually draw the character actor to guarantee it renders on top of the text
+    if is_colliding then
+        lz.screen.draw.text("COLLISION STATUS: [ ACTIVE - RED BACKGROUND ]", {50, 110})
+    else
+        lz.screen.draw.text("COLLISION STATUS: [ INACTIVE - BLUE BACKGROUND ]", {50, 110})
+    end
+    
+    -- Manually draw both character actors to control rendering/layering
+    stationary_block:draw()
     character:draw()
 end
 
