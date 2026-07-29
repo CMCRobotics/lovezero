@@ -1,3 +1,7 @@
+-- Allow require to find 'lovezero' when running `love examples/trivial` from the repo root.
+-- Love2D changes its virtual filesystem root to the example folder, but the OS working directory remains the repo root.
+package.path = package.path .. ";./?.lua;./?/init.lua"
+
 local lz = require("lovezero")
 
 -- A trivial example showing LoveZero's screen operations

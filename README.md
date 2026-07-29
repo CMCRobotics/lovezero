@@ -13,29 +13,13 @@ LoveZero is a cross-engine framework inspired by Pygame Zero, designed to run se
 
 Drop the `lovezero/` folder into your project directory. 
 
-### Trivial Example (`main.lua`)
+### Trivial Example (`examples/trivial/main.lua`)
 
-```lua
-local lz = require("lovezero")
+Check out the `examples/trivial` folder for a basic moving box example. 
 
-local x, y = 100, 100
-
-lz.start({
-    update = function(dt)
-        x = x + (100 * dt)
-    end,
-    
-    draw = function()
-        lz.screen.fill({0.1, 0.1, 0.2})
-        lz.screen.draw.rect({x, y, 50, 50}, {1, 0.5, 0})
-        lz.screen.draw.text("LoveZero Example", {50, 50})
-    end
-})
-```
-
-You can run this project just like any Love2D project:
+You can run this example using Love2D from the repository root:
 ```bash
-love .
+love examples/trivial
 ```
 
 ## Running Tests
