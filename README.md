@@ -22,13 +22,22 @@ You can run this example using Love2D from the repository root:
 love examples/trivial
 ```
 
-### Nest Integration Example (`examples/nest_trivial/main.lua`)
+### Nest Integration 3DS Example (`examples/nest_trivial_3ds/main.lua`)
 
-Check out the `examples/nest_trivial` folder for a basic moving box example running with **Nest** (useful for console emulators/hardware targeting Nintendo 3DS).
+Check out the `examples/nest_trivial_3ds` folder for a basic moving box example running with **Nest** configured to emulate/target a Nintendo 3DS screen.
 
 You can run this example using Love2D from the repository root:
 ```bash
-love examples/nest_trivial
+love examples/nest_trivial_3ds
+```
+
+### Nest Integration Switch Example (`examples/nest_trivial_switch/main.lua`)
+
+Check out the `examples/nest_trivial_switch` folder for a basic moving box example running with **Nest** configured to emulate/target a Nintendo Switch screen.
+
+You can run this example using Love2D from the repository root:
+```bash
+love examples/nest_trivial_switch
 ```
 
 ## Running Tests
