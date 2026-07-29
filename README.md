@@ -22,6 +22,15 @@ You can run this example using Love2D from the repository root:
 love examples/trivial
 ```
 
+### Nest Integration Example (`examples/nest_trivial/main.lua`)
+
+Check out the `examples/nest_trivial` folder for a basic moving box example running with **Nest** (useful for console emulators/hardware targeting Nintendo 3DS).
+
+You can run this example using Love2D from the repository root:
+```bash
+love examples/nest_trivial
+```
+
 ## Running Tests
 LoveZero includes a headless pure-Lua test suite to validate internal logic without needing a graphical environment.
 ```bash
