@@ -95,3 +95,4 @@ chmod +x test.sh
 
 ## Credits
 - Character assets provided by the amazing [Kenney Assets](https://kenney.nl/) from the [New Platformer Pack](https://kenney.nl/assets/new-platformer-pack).
+- The sample Lutro font provided by the [Lutro project](https://lutro.libretro.com/).
