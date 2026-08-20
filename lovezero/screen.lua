@@ -28,6 +28,11 @@ function screen.fill(color)
                     local g_c = color[2] or color.g or 0
                     local b = color[3] or color.b or 0
                     local a = color[4] or color.a or 1
+                    -- Lutro colors are in 0-255 range instead of 0-1
+                    r = math.floor(r * 255)
+                    g_c = math.floor(g_c * 255)
+                    b = math.floor(b * 255)
+                    a = math.floor(a * 255)
                     g.setBackgroundColor(r, g_c, b, a)
                 end
                 g.clear()
@@ -125,12 +130,24 @@ function screen.draw.rect(rect, color)
             local c_g = color[2] or color.g or 1
             local b = color[3] or color.b or 1
             local a = color[4] or color.a or 1
+            if type(lutro) == "table" then
+                r = math.floor(r * 255)
+                c_g = math.floor(c_g * 255)
+                b = math.floor(b * 255)
+                a = math.floor(a * 255)
+            end
             g.setColor(r, c_g, b, a)
         elseif color and g.setColor then
             local r = color[1] or color.r or 1
             local c_g = color[2] or color.g or 1
             local b = color[3] or color.b or 1
             local a = color[4] or color.a or 1
+            if type(lutro) == "table" then
+                r = math.floor(r * 255)
+                c_g = math.floor(c_g * 255)
+                b = math.floor(b * 255)
+                a = math.floor(a * 255)
+            end
             g.setColor(r, c_g, b, a)
         end
 

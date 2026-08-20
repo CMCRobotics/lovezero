@@ -146,7 +146,11 @@ function Actor:draw()
             prev_r, prev_g, prev_b, prev_a = g.getColor()
         end
         if g.setColor then
-            g.setColor(1, 0, 1, 1) -- magenta for missing texture
+            local r, g_c, b, a = 1, 0, 1, 1
+            if type(lutro) == "table" then
+                r, g_c, b, a = 255, 0, 255, 255
+            end
+            g.setColor(r, g_c, b, a) -- magenta for missing texture
         end
         
         local w = (self.width > 0 and self.width or 32) * sx
