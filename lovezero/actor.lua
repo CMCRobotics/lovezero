@@ -117,12 +117,28 @@ function Actor:update(dt)
     -- Default empty update
 end
 
+local function get_scales()
+    local g = get_graphics()
+    if g and g.getWidth and g.getHeight then
+        local w, h = g.getWidth(), g.getHeight()
+        -- Default design/virtual resolution is 800x600.
+        -- Use uniform scaling (minimum factor) to preserve the aspect ratio and prevent squashing/stretching.
+        if w > 0 and h > 0 then
+            local scale = math.min(w / 800, h / 600)
+            return scale, scale
+        end
+    end
+    return 1, 1
+end
+
 function Actor:draw()
     local g = get_graphics()
     if not g then return end
     
+    local sx, sy = get_scales()
     if self.image and g.draw then
-        g.draw(self.image, self.x, self.y)
+        -- Standard LÖVE and Lutro support scale factors (sx, sy) as the 5th and 6th arguments in g.draw.
+        g.draw(self.image, self.x * sx, self.y * sy, 0, sx, sy)
     elseif g.rectangle then
         -- fallback block
         local prev_r, prev_g, prev_b, prev_a
@@ -133,7 +149,9 @@ function Actor:draw()
             g.setColor(1, 0, 1, 1) -- magenta for missing texture
         end
         
-        g.rectangle("fill", self.x, self.y, self.width > 0 and self.width or 32, self.height > 0 and self.height or 32)
+        local w = (self.width > 0 and self.width or 32) * sx
+        local h = (self.height > 0 and self.height or 32) * sy
+        g.rectangle("fill", self.x * sx, self.y * sy, w, h)
         
         if prev_r and g.setColor then
             g.setColor(prev_r, prev_g, prev_b, prev_a)

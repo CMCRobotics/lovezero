@@ -40,6 +40,51 @@ You can run this example using Love2D from the repository root:
 love examples/nest_trivial_switch
 ```
 
+### Lutro Integration Example (`examples/lutro_trivial/main.lua`)
+
+Check out the `examples/lutro_trivial` folder for a basic example running on **Lutro** (the LÖVE-like libretro core for RetroArch).
+
+#### Setup on a Typical Linux Distribution (e.g., Ubuntu/Debian)
+
+To run Lutro, you will need to install RetroArch and the Lutro libretro core. On typical Debian/Ubuntu-based distributions, install them via `apt`:
+
+```bash
+sudo apt update
+sudo apt install -y retroarch libretro-lutro
+```
+
+#### Running the Lutro Example
+
+We provide a convenient `./lutro` executable wrapper script in the repository root that automatically locates the installed Lutro core on your system and launches the target directory:
+
+```bash
+# Set execute permissions on the wrapper if needed
+chmod +x ./lutro
+
+# Run the trivial example with Lutro
+./lutro examples/lutro_trivial
+```
+
+Alternatively, you can launch RetroArch manually and point it to the Lutro core and `main.lua` file:
+
+```bash
+retroarch -L /usr/lib/x86_64-linux-gnu/libretro/lutro_libretro.so examples/lutro_trivial/main.lua
+```
+
+*Note: Depending on your Linux distribution or installation source, the core might be located at `/usr/lib/libretro/lutro_libretro.so` or `~/.config/retroarch/cores/lutro_libretro.so`.*
+
+#### Headless / CI Testing
+
+For automated testing or headless environments, you can run the Lutro wrapper using virtual framebuffer (`xvfb-run`):
+
+```bash
+# Install xvfb if not already present
+sudo apt install -y xvfb
+
+# Run the example headlessly
+xvfb-run -a ./lutro examples/lutro_trivial
+```
+
 ## Running Tests
 LoveZero includes a headless pure-Lua test suite to validate internal logic without needing a graphical environment.
 ```bash

@@ -1,0 +1,51 @@
+#!/bin/bash
+# Small executable wrapper for Lutro to run games like the 'love' CLI.
+# Usage: ./lutro <path_to_game_directory_or_main_lua>
+
+# Define common locations for the Lutro libretro core
+CORES=(
+    "/usr/lib/x86_64-linux-gnu/libretro/lutro_libretro.so"
+    "/usr/lib/libretro/lutro_libretro.so"
+    "$HOME/.config/retroarch/cores/lutro_libretro.so"
+    "/usr/local/lib/libretro/lutro_libretro.so"
+    "lutro_libretro.so"
+)
+
+CORE_PATH=""
+for core in "${CORES[@]}"; do
+    if [ -f "$core" ]; then
+        CORE_PATH="$core"
+        break
+    fi
+done
+
+# If core is not found in common paths, try to find it via find or locate, or default to the shared object name
+if [ -z "$CORE_PATH" ]; then
+    CORE_PATH=$(find /usr/lib -name "lutro_libretro.so" 2>/dev/null | head -n 1)
+fi
+
+if [ -z "$CORE_PATH" ]; then
+    CORE_PATH="lutro_libretro.so"
+fi
+
+# Check if retroarch is installed
+if ! command -v retroarch &> /dev/null; then
+    echo "Error: 'retroarch' is not installed or not in PATH."
+    echo "Please install it using: sudo apt install retroarch"
+    exit 1
+fi
+
+# Determine the target path (default to current directory if none provided)
+TARGET="${1:-.}"
+
+# If target is a directory, point directly to main.lua if it exists
+if [ -d "$TARGET" ] && [ -f "$TARGET/main.lua" ]; then
+    TARGET="$TARGET/main.lua"
+fi
+
+echo "Starting Lutro wrapper..."
+echo "Core path: $CORE_PATH"
+echo "Target: $TARGET"
+echo "-------------------------------------"
+
+exec retroarch -L "$CORE_PATH" "$TARGET"
