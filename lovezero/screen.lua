@@ -64,12 +64,31 @@ local function get_scales()
     return 1, 1
 end
 
+local default_font = nil
+
+local function ensure_lutro_font()
+    local g = get_graphics()
+    if g and type(lutro) == "table" and not default_font then
+        if g.newImageFont then
+            -- Standard glyphs string
+            local glyphs = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,!?-+/():;=~_"
+            local ok, font = pcall(g.newImageFont, "font.png", glyphs)
+            if ok and font then
+                default_font = font
+                g.setFont(font)
+            end
+        end
+    end
+end
+
 function screen.draw.text(text, pos)
     local g = get_graphics()
     if not g then
         print("Warning: Graphics module not available.")
         return
     end
+
+    ensure_lutro_font()
 
     if g.print then
         local sx, sy = get_scales()
