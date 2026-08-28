@@ -1,0 +1,110 @@
+# LoveZero AI Coding Agent Guide
+
+Welcome to LoveZero! This file contains key architecture insights, API references, engine caveats, and commands to help you get started quickly without having to search or parse extensive codebase context.
+
+---
+
+## 1. Project Purpose
+LoveZero is a cross-engine game development framework inspired by **Pygame Zero**. It abstracts game loop differences and automatically detects and runs on:
+1. **Love2D** (Standard desktop engine)
+2. **Lutro** (RetroArch libretro core - extremely lightweight, limited feature set)
+3. **Love Potion** (Homebrew engine targeting Nintendo 3DS and Nintendo Switch)
+
+---
+
+## 2. Directory Layout
+- `/lovezero/`: Core framework source.
+  - `init.lua`: Hooks into engine callbacks (`update` / `draw`), detects running engine, lists active actors.
+  - `lovezero.lua`: Metadata and Sumneko LuaLS definitions for type safety.
+  - `actor.lua`: Character rendering, AABB collisions, image loaders.
+  - `clock.lua`: Game ticks, scheduled interval routines, scheduled unique events, and `animate` (tween) logic.
+  - `screen.lua`: Screen drawing hooks (color clear, rectangles, text).
+- `/examples/`: Run these to see LoveZero in action or check integration patterns:
+  - `trivial/`: Desktop Love2D demo.
+  - `lutro_trivial/`: Lutro RetroArch demo.
+  - `nest_trivial_3ds/`: Nintendo 3DS emulation demo using the Nest helper.
+  - `nest_trivial_switch/`: Nintendo Switch emulation demo using the Nest helper.
+- `/tests/`: Automated unit tests. Must remain engine-agnostic (runnable in headless CLI).
+
+---
+
+## 3. Core API Quick-Reference
+
+### Lifecycle Hooks
+```lua
+local lz = require("lovezero")
+
+-- Registers your drawing & updating functions.
+lz.start({
+    update = function(dt)
+        -- Tick updates here
+    end,
+    draw = function()
+        -- Game rendering here
+    end
+})
+```
+
+### Actor Model (`lz.Actor`)
+```lua
+local my_actor = lz.Actor:new({
+    x = 100,
+    y = 100,
+    width = 32,
+    height = 32,
+    image = "assets/alien" -- image path (will auto-append suffix where appropriate)
+})
+
+-- Register actor to let the LoveZero framework update & draw it automatically:
+lz.add(my_actor)
+
+-- Collision detection: AABB check
+if my_actor:colliderect(another_actor) then
+    print("Collision detected!")
+end
+```
+
+### Screen Module (`lz.screen`)
+Colors can be specified as table indexes `{r, g, b, a}` or dictionary keys `{r=r, g=g, b=b, a=a}`.
+- `lz.screen.fill(color)`: Clears screen with a background color.
+- `lz.screen.draw.rect(rect, color)`: Draws a rectangle outline or filled shape. `rect` is `{x, y, w, h}`.
+- `lz.screen.draw.text(text, position)`: Draws text at position `{x, y}`.
+
+### Clock Timers & Tweens (`lz.clock`)
+- `lz.clock.schedule_interval(func, interval_in_seconds)`: Keep running `func` repeatedly.
+- `lz.clock.schedule_unique(func, delay_in_seconds)`: Run `func` exactly once after a delay.
+- `lz.clock.animate(target_table, duration, target_properties)`: Smoothly interpolate numbers in a table (e.g. animate actor's `x` or `y`).
+
+---
+
+## 4. Key Development Rules & Gotchas
+
+1. **Engine-Specific Checks:** If calling standard engine functions (e.g. `love.graphics` or `lutro.graphics`), always guard them by checking `lz.engine` (which returns `"love2d"`, `"lutro"`, or `"lovepotion"`).
+2. **Lutro Compatibility:** The Lutro engine has strict RetroArch API limitations. Ensure drawing/position operations do not rely on advanced shaders, high resolutions, or newer Love2D canvas operations.
+3. **Headless Unit Tests:** All core framework logic (such as scheduling in `clock.lua` and actor movement/bounding boxes) must be testable headlessly via standard Lua. Avoid coupling internal framework tests to standard LÖVE graphic APIs so they can be run in CLI pipelines.
+
+---
+
+## 5. Development & Testing Commands
+
+### Run Unit Tests (Headless)
+Always run the suite to make sure logic changes didn't break things:
+```bash
+./test.sh
+```
+
+### Launch Examples on Love2D (Desktop)
+```bash
+love examples/trivial
+```
+
+### Launch Nest-based Screen-Emulated Examples
+```bash
+love examples/nest_trivial_3ds
+love examples/nest_trivial_switch
+```
+
+### Launch Lutro Example
+```bash
+./lutro examples/lutro_trivial
+```
